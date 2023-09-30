@@ -16,22 +16,29 @@
 # @raycast.authorURL https://github.com/mmerle
 # @raycast.description Switch audio output to desired device.
 
-set asrc to "<Device Name>"
+set myDevices to "<Device Name>"
 
-tell application "System Preferences"
-
-	reveal anchor "output" of pane id "com.apple.preference.sound"
-	
-	delay 1
-	
-	tell application "System Events"
-		tell process "System Preferences"
-			select (row 1 of table 1 of scroll area 1 of tab group 1 of window "Sound" whose value of text field 1 is asrc)
-		end tell
-	end tell
-	
-	quit
-	
+tell application "System Settings"
+	activate
+	reveal anchor "output" of pane id "com.apple.Sound-Settings.extension"
 end tell
 
+delay 3
+
+tell application "System Events"
+	tell application process "System Settings"
+		set theRows to (every row of table 1 of scroll area 1 of group 2 of scroll area 1 of group 1 of group 2 of splitter group 1 of group 1 of window "Sound")
+		repeat with myDevice in myDevices
+			set theDevice to myDevice as string
+			repeat with aRow in theRows
+				if name of first item of static text of group 1 of UI element 1 of aRow is equal to theDevice then
+					set selected of aRow to true
+					exit repeat
+				end if
+			end repeat
+		end repeat
+	end tell
+end tell
+
+quit application "System Settings"
 do shell script "echo Audio switched to <Device Name>"
